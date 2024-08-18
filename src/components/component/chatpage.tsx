@@ -21,7 +21,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 
-export function chat-page() {
+export function chatpage() {
   return (
     <div className="grid md:grid-cols-[300px_1fr] min-h-screen w-full bg-background">
       <div className="flex flex-col border-r bg-card">
@@ -142,7 +142,7 @@ export function chat-page() {
   )
 }
 
-function MoveHorizontalIcon(props) {
+function MoveHorizontalIcon(props:any) {
   return (
     <svg
       {...props}
@@ -164,7 +164,7 @@ function MoveHorizontalIcon(props) {
 }
 
 
-function SendIcon(props) {
+function SendIcon(props:any) {
   return (
     <svg
       {...props}
