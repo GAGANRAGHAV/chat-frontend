@@ -55,6 +55,11 @@ export default function chatpage() {
   const [file, setFile] = useState<File | null>(null);
   const token = localStorage.getItem("token");
 
+//   if (typeof window !== "undefined") {
+//     // Your code using localStorage
+//     const token = localStorage.getItem("token");
+//   }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
@@ -109,41 +114,47 @@ export default function chatpage() {
   };
 
   useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const response = await axios.get("https://chat-backend-ndug.onrender.com/me", {
-          headers: { Authorization: `Bearer ${token}` },
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("token");
+
+
+
+        const fetchUserId = async () => {
+          try {
+            const response = await axios.get("https://chat-backend-ndug.onrender.com/me", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            setUsername(response.data.username);
+            setUserId(response.data._id);
+          } catch (error) {
+            console.error("Failed to fetch user ID", error);
+          }
+        };
+    
+        const fetchUsers = async () => {
+          try {
+            const response = await axios.get("https://chat-backend-ndug.onrender.com/users", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            setUsers(response.data);
+          } catch (error) {
+            console.error("Failed to fetch users", error);
+          }
+        };
+        fetchUserId();
+        fetchUsers();
+        socket.on("receiveMessage", (newMessage: Message) => {
+          if (newMessage.from === recipientId || newMessage.to === recipientId) {
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+          }
         });
-        setUsername(response.data.username);
-        setUserId(response.data._id);
-      } catch (error) {
-        console.error("Failed to fetch user ID", error);
-      }
-    };
+    
+        return () => {
+          socket.off("receiveMessage");
+        };
+    }
 
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("https://chat-backend-ndug.onrender.com/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUsers(response.data);
-      } catch (error) {
-        console.error("Failed to fetch users", error);
-      }
-    };
 
-    fetchUserId();
-    fetchUsers();
-
-    socket.on("receiveMessage", (newMessage: Message) => {
-      if (newMessage.from === recipientId || newMessage.to === recipientId) {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      }
-    });
-
-    return () => {
-      socket.off("receiveMessage");
-    };
   }, [token, recipientId]);
 
   //   const handleSendMessage = async () => {
