@@ -7,14 +7,11 @@
  */
 
 /** Add fonts into your Next.js project:
-
 import { Inter } from 'next/font/google'
-
 inter({
   subsets: ['latin'],
   display: 'swap',
 })
-
 To read more about using these font, please visit the Next.js documentation:
 - App Directory: https://nextjs.org/docs/app/building-your-application/optimizing/fonts
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
@@ -29,7 +26,7 @@ import io from "socket.io-client";
 import axios from "axios";
 import { storage } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-const socket = io("https://chat-backend-ndug.onrender.com");
+const socket = io("http://localhost:5000");
 
 type Message = {
   _id: string;
@@ -54,11 +51,6 @@ export default function chatpage() {
   const [users, setUsers] = useState<User[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const token = localStorage.getItem("token");
-
-//   if (typeof window !== "undefined") {
-//     // Your code using localStorage
-//     const token = localStorage.getItem("token");
-//   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -114,47 +106,41 @@ export default function chatpage() {
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-        const token = localStorage.getItem("token");
-
-
-
-        const fetchUserId = async () => {
-          try {
-            const response = await axios.get("https://chat-backend-ndug.onrender.com/me", {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            setUsername(response.data.username);
-            setUserId(response.data._id);
-          } catch (error) {
-            console.error("Failed to fetch user ID", error);
-          }
-        };
-    
-        const fetchUsers = async () => {
-          try {
-            const response = await axios.get("https://chat-backend-ndug.onrender.com/users", {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            setUsers(response.data);
-          } catch (error) {
-            console.error("Failed to fetch users", error);
-          }
-        };
-        fetchUserId();
-        fetchUsers();
-        socket.on("receiveMessage", (newMessage: Message) => {
-          if (newMessage.from === recipientId || newMessage.to === recipientId) {
-            setMessages((prevMessages) => [...prevMessages, newMessage]);
-          }
+    const fetchUserId = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/me", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-    
-        return () => {
-          socket.off("receiveMessage");
-        };
-    }
+        setUsername(response.data.username);
+        setUserId(response.data._id);
+      } catch (error) {
+        console.error("Failed to fetch user ID", error);
+      }
+    };
 
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      }
+    };
 
+    fetchUserId();
+    fetchUsers();
+
+    socket.on("receiveMessage", (newMessage: Message) => {
+      if (newMessage.from === recipientId || newMessage.to === recipientId) {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
   }, [token, recipientId]);
 
   //   const handleSendMessage = async () => {
@@ -181,7 +167,7 @@ export default function chatpage() {
   const handleGetMessages = async (user: any) => {
     try {
       const response = await axios.get(
-        `https://chat-backend-ndug.onrender.com/${user._id}`,
+        `http://localhost:5000/messages/${user._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

@@ -87,7 +87,7 @@ export default function login() {
     const handleLogin = async (e:any) => {
       e.preventDefault();
       try {
-        const response = await axios.post('https://chat-backend-ndug.onrender.com/login', { username, password });
+        const response = await axios.post('http://localhost:5000/login', { username, password });
         localStorage.setItem('token', response.data.token);
       //   console.log("hii");
       console.log(response.data);
@@ -100,7 +100,7 @@ export default function login() {
     const handleRegister = async (e:any) => {
         e.preventDefault();
         try {
-          await axios.post('https://chat-backend-ndug.onrender.com/register', { username, password });
+          await axios.post('http://localhost:5000/register', { username, password });
         //   router.push('/chatpage');
         alert("Successfully registered, Now Login.");
         } catch (error) {
